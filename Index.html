@@ -1,0 +1,2516 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Malayalam IPTV - Premium Stream Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #0f0f1e;
+            color: #fff;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        /* FIXED TOP MENU BAR */
+        .menu-bar {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1003;
+        }
+        .menu-icon, .user-icon, .admin-icon { font-size: 24px; cursor: pointer; padding: 8px; border-radius: 10px; }
+        .app-title-menu { font-size: 16px; font-weight: 600; }
+
+        /* SETTINGS BUTTON IN MENU BAR */
+        .settings-btn {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 13px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: 0.2px;
+            transition: background 0.18s;
+        }
+        .settings-btn:active { background: rgba(255,255,255,0.22); }
+
+        /* SETTINGS SHEET (slides up from bottom) */
+        .settings-sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 4000;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .settings-sheet-overlay.open { display: flex; }
+        .settings-sheet {
+            background: #1a1a2e;
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 520px;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 0 0 24px 0;
+            animation: slideUp 0.28s cubic-bezier(0.32,0.72,0,1);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .settings-handle {
+            display: flex;
+            justify-content: center;
+            padding: 14px 0 4px;
+        }
+        .settings-handle-bar {
+            width: 40px; height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+        }
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 20px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .settings-header h2 { font-size: 18px; font-weight: 700; }
+        .settings-close-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .settings-section-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.4;
+            padding: 16px 20px 6px;
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            gap: 12px;
+        }
+        .settings-row-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .settings-row-icon { font-size: 20px; width: 28px; text-align: center; }
+        .settings-row-text strong { display: block; font-size: 14px; }
+        .settings-row-text span { display: block; font-size: 11px; opacity: 0.5; margin-top: 1px; }
+        .settings-row select {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .settings-row select option { background: #1a1a2e; }
+        .settings-action-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            padding: 7px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s;
+        }
+        .settings-action-btn:active { background: rgba(255,255,255,0.22); }
+        .settings-action-btn.danger { background: rgba(244,67,54,0.15); border-color: rgba(244,67,54,0.3); color: #ff6b6b; }
+        .settings-action-btn.primary { background: linear-gradient(135deg,#ff6b6b,#ee5a24); border-color: transparent; font-weight: 600; }
+        .settings-admin-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 14px 20px 0;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, rgba(102,126,234,0.25), rgba(118,75,162,0.25));
+            border: 1px solid rgba(102,126,234,0.35);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: background 0.18s;
+        }
+        .settings-admin-btn:active { background: rgba(102,126,234,0.35); }
+        .settings-admin-btn-left { display: flex; align-items: center; gap: 12px; }
+        .settings-admin-btn-left .adm-icon { font-size: 26px; }
+        .settings-admin-btn-left strong { display: block; font-size: 15px; }
+        .settings-admin-btn-left span { display: block; font-size: 11px; opacity: 0.5; }
+        .settings-admin-btn-arrow { font-size: 18px; opacity: 0.4; }
+
+        /* FIXED PLAYER POSITIONED BELOW TOP MENU BAR */
+        .player-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            z-index: 1002;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+        .player-container.open { 
+            display: flex; 
+            flex-direction: column;
+            height: 48vh;
+        }
+        .video-wrapper { 
+            position: relative; 
+            flex: 1;
+            height: 0;
+            background: #000;
+        }
+        video { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+        }
+        .player-status-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1009;
+            color: #ff6b6b;
+            font-size: 13px;
+            padding: 15px;
+            text-align: center;
+            pointer-events: none;
+        }
+        .close-player {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1010;
+            color: white;
+            font-weight: bold;
+        }
+        .player-controls-bar {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 8px 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* DROPDOWN STYLINGS */
+        .player-select {
+            background: #1a1a2e;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            outline: none;
+        }
+        .player-select option {
+            background-color: #1a1a2e !important;
+            color: #ffffff !important;
+        }
+        
+        .retry-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border: none;
+            padding: 5px 12px;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        /* SCROLLABLE CONTENT BODY AREA */
+        .main-scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Modals and Configurations UI */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .login-modal.active { display: flex; }
+        .login-box {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .login-header { text-align: center; margin-bottom: 30px; }
+        .login-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 15px;
+        }
+        .input-group { margin-bottom: 15px; }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .input-group select option { background: #1a1a2e; color: white; }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        /* Preferences Radio Elements */
+        .player-choice-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .player-choice-card:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        .player-choice-card input[type="radio"] {
+            transform: scale(1.2);
+            accent-color: #ee5a24;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f0f1e;
+            z-index: 3000;
+            overflow-y: auto;
+            display: none;
+        }
+        .admin-panel.active { display: block; }
+        .admin-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.3);
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+        .admin-tab {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+        .admin-tab.active { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        .admin-content { padding: 15px; max-width: 1200px; margin: 0 auto; }
+        .admin-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .admin-card h3 { margin-bottom: 12px; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        .admin-input {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+        .admin-input option { background: #1a1a2e; color: white; }
+        .admin-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .admin-btn-small { padding: 6px 12px; font-size: 12px; background: rgba(255,255,255,0.15); color: white; border: none; border-radius: 6px; cursor: pointer; margin-right: 4px; }
+        .playlist-item, .admin-channel-item, .file-item {
+            background: rgba(255,255,255,0.08);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .playlist-details {
+            flex: 1;
+            min-width: 200px;
+        }
+        .playlist-url-text {
+            font-size: 11px;
+            opacity: 0.6;
+            word-break: break-all;
+            display: block;
+            margin-top: 4px;
+        }
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 11px;
+            display: inline-block;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .status-enabled { background: rgba(76,175,80,0.3); color: #4CAF50; }
+        .status-disabled { background: rgba(244,67,54,0.3); color: #f44336; }
+        .stat-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            min-width: 100px;
+        }
+        .stat-number { font-size: 28px; font-weight: bold; color: #ff6b6b; }
+        .stat-label { font-size: 11px; opacity: 0.8; }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: rgba(15, 15, 30, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 2001;
+            transition: left 0.3s ease;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar.open { left: 0; }
+        .menu-item {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+
+        /* Standardized Menu Elements */
+        .search-bar { padding: 10px 16px; background: rgba(0,0,0,0.2); }
+        .search-bar input {
+            width: 100%;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 25px;
+            color: white;
+            text-align: center;
+            font-size: 14px;
+        }
+        .categories-bar {
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.2);
+            overflow-x: auto;
+            white-space: nowrap;
+            display: flex;
+            gap: 6px;
+        }
+        .category-chip {
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 12px;
+        }
+        .category-chip.active { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        
+        /* RESPONSIVE SCROLLABLE SECTION TAB BAR */
+        .tab-bar {
+            display: flex;
+            padding: 8px 6px;
+            gap: 4px;
+            background: rgba(0,0,0,0.3);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .tab {
+            flex: 1;
+            min-width: 75px;
+            padding: 10px 4px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+        }
+        .tab.active { background: rgba(255,255,255,0.2); color: white; font-weight: bold; }
+        
+        .panel {
+            display: none;
+        }
+        .panel.active { display: block; }
+        
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            padding: 12px;
+        }
+        .channel-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 10px 8px;
+            cursor: pointer;
+            text-align: center;
+            position: relative;
+            transition: transform 0.2s;
+        }
+        .channel-card:active { transform: scale(0.97); }
+        .channel-card .fav-star {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+        .channel-logo-wrapper {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 6px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            overflow: hidden;
+        }
+        .channel-logo-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .channel-name { font-size: 11px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .loading-trigger { text-align: center; padding: 20px; grid-column: 1 / -1; }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+        }
+        .loading-state, .empty-state { text-align: center; padding: 40px; opacity: 0.7; }
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 600px) {
+            .channels-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; padding: 8px; }
+            .channel-card { padding: 8px 4px; }
+        }
+
+        /* TV MODE */
+        body.tv-mode .channels-grid {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            padding: 16px;
+        }
+        body.tv-mode .channel-card {
+            padding: 18px 12px;
+            border-radius: 18px;
+        }
+        body.tv-mode .channel-logo-wrapper {
+            width: 70px;
+            height: 70px;
+            font-size: 34px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+        }
+        body.tv-mode .channel-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        body.tv-mode .player-container.open {
+            height: 60vh;
+        }
+        body.tv-mode .menu-bar {
+            padding: 16px 24px;
+        }
+        body.tv-mode .app-title-menu {
+            font-size: 20px;
+        }
+        body.tv-mode .tab-bar .tab {
+            font-size: 16px;
+            padding: 12px;
+        }
+        body.tv-mode .category-chip {
+            font-size: 14px;
+            padding: 8px 18px;
+        }
+        body.tv-mode .search-bar input {
+            font-size: 16px;
+            padding: 12px 20px;
+        }
+
+        /* FULLSCREEN PLAYER BUTTON */
+        .fullscreen-btn {
+            background: rgba(0,0,0,0.6);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 15px;
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            z-index: 1010;
+        }
+        .player-container.fullscreen-active {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            display: flex !important;
+        }
+    </style>
+    <!-- Firebase Realtime Database SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script type="module">
+      import { initializeApp }                          from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+      import { getDatabase, ref, get, set, onValue }   from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey:            "AIzaSyC8I8TlGGgecr5kRDGY03zCfdLV4qpSJjM",
+        authDomain:        "webapp-database-aa250.firebaseapp.com",
+        databaseURL:       "https://webapp-database-aa250-default-rtdb.firebaseio.com",
+        projectId:         "webapp-database-aa250",
+        storageBucket:     "webapp-database-aa250.firebasestorage.app",
+        messagingSenderId: "94114379230",
+        appId:             "1:94114379230:web:065dd591d51e413578994f",
+        measurementId:     "G-CW5MRETQ6B"
+      };
+
+      try {
+        const app = initializeApp(firebaseConfig);
+        const db  = getDatabase(app);
+
+        // ── Read a path ─────────────────────────────────────────────
+        window._fbRead = async (path) => {
+          try {
+            const snap = await get(ref(db, path));
+            return snap.exists() ? snap.val() : null;
+          } catch(e) { console.warn('fbRead:', e); return null; }
+        };
+
+        // ── Write a path ────────────────────────────────────────────
+        window._fbWrite = async (path, value) => {
+          try {
+            await set(ref(db, path), value);
+            return true;
+          } catch(e) { console.warn('fbWrite:', e); return false; }
+        };
+
+        // ── Real-time listener ───────────────────────────────────────
+        window._fbListen = (path, callback) => {
+          onValue(ref(db, path), snap => {
+            callback(snap.exists() ? snap.val() : null);
+          });
+        };
+
+        window._fbReady = true;
+        console.log("✅ Firebase Realtime Database connected");
+      } catch(e) {
+        window._fbReady = false;
+        console.warn("Firebase init failed:", e);
+      }
+
+      window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+</head>
+<body>
+    <div class="login-modal" id="loginModal">
+        <div class="close-modal" onclick="closeLoginModal()">✕</div>
+        <div class="login-box">
+            <div class="login-header"><div class="login-icon">📺</div><h2>Malayalam IPTV</h2><p>Enter your credentials</p></div>
+            <div class="input-group"><input type="text" id="loginUsername" placeholder="Username"></div>
+            <div class="input-group"><input type="password" id="loginPassword" placeholder="Password"></div>
+            <button class="login-btn" onclick="handleUserLogin()">Login</button>
+        </div>
+    </div>
+
+    <!-- PLAYER SETUP MODAL (Enables switching between internal and external apps) -->
+    <div class="login-modal" id="playerSettingsModal">
+        <div class="close-modal" onclick="closePlayerSettingsModal()">✕</div>
+        <div class="login-box">
+            <div class="login-header">
+                <div class="login-icon">⚙️</div>
+                <h2>Player Setup</h2>
+                <p>Configure internal or external playback options</p>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label class="player-choice-card">
+                    <input type="radio" name="playerPref" value="internal" onchange="savePlayerPreference('internal')">
+                    <div>
+                        <strong>Internal Player (Default)</strong>
+                        <div style="font-size: 11px; opacity: 0.7;">Default streaming directly within the application.</div>
+                    </div>
+                </label>
+                <label class="player-choice-card">
+                    <input type="radio" name="playerPref" value="vlc" onchange="savePlayerPreference('vlc')">
+                    <div>
+                        <strong>VLC Player</strong>
+                        <div style="font-size: 11px; opacity: 0.7;">Redirects and launches VLC Media Player.</div>
+                    </div>
+                </label>
+                <label class="player-choice-card">
+                    <input type="radio" name="playerPref" value="mx" onchange="savePlayerPreference('mx')">
+                    <div>
+                        <strong>MX Player</strong>
+                        <div style="font-size: 11px; opacity: 0.7;">Launches Android MX Player intent.</div>
+                    </div>
+                </label>
+            </div>
+            <button class="login-btn" onclick="closePlayerSettingsModal()">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- Admin Panel Dashboard -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-header"><h2 id="adminTitle">Admin Dashboard</h2><button class="admin-btn" onclick="closeAdminPanel()">Close</button></div>
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="showAdminTab('playlists')">📋 Playlists & Editor</button>
+            <button class="admin-tab" onclick="showAdminTab('uploadm3u')">📤 Upload M3U Only</button>
+            <button class="admin-tab" onclick="showAdminTab('analytics')">📊 Live Analytics</button>
+            <button class="admin-tab" onclick="showAdminTab('channels')">📺 Channels</button>
+            <button class="admin-tab" onclick="showAdminTab('deleted')">🗑️ Deleted</button>
+            <button class="admin-tab" onclick="showAdminTab('categories')">🏷️ Categories</button>
+            <button class="admin-tab" id="usersTabBtn" onclick="showAdminTab('users')">👥 Users</button>
+        </div>
+        <div class="admin-content">
+            <!-- Playlists Management Tab -->
+            <div id="playlistsTab" class="admin-tab-content">
+                <div id="gistStatusBanner"></div>
+
+                <!-- Live Preview Player inside Admin -->
+                <div id="adminPreviewWrap" style="display:none; margin-bottom:14px;">
+                    <div style="background:#000; border-radius:14px; overflow:hidden; position:relative;">
+                        <video id="adminPreviewVideo" controls playsinline style="width:100%; max-height:240px; display:block;"></video>
+                        <div id="adminPreviewStatus" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); color:#ff6b6b; font-size:13px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; padding:16px; text-align:center;"></div>
+                        <button onclick="closeAdminPreview()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;">✕</button>
+                        <div id="adminPreviewLabel" style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.8));padding:8px 12px;font-size:12px;font-weight:600;"></div>
+                    </div>
+                </div>
+
+                <div class="admin-card" id="playlistFormContainer">
+                    <h3 id="formTitle">➕ Add M3U Playlist URL</h3>
+                    <input type="hidden" id="editPlaylistId">
+                    <input type="text" id="newPlaylistName" class="admin-input" placeholder="Playlist Name (e.g. Malayalam HD)">
+                    <input type="text" id="newPlaylistUrl" class="admin-input" placeholder="https://example.com/playlist.m3u">
+                    
+                    <label style="font-size:12px; display:block; margin:6px 0 2px; opacity:0.8;">Upload Destination Type:</label>
+                    <select id="newPlaylistVisibility" class="admin-input" style="margin-bottom:8px;">
+                        <option value="main">📢 Main Uploading (Visible to Everyone)</option>
+                        <option value="just">🔒 Just Uploading (Visible to Super Users & Admins Only)</option>
+                    </select>
+                    
+                    <p style="font-size:11px;opacity:0.5;margin-bottom:8px;">🔒 URL is stored securely and hidden from public view</p>
+                    <div style="margin-top: 8px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="admin-btn" id="playlistSubmitBtn" onclick="addM3UPlaylist()">Add Playlist</button>
+                        <button class="admin-btn" id="playlistCancelBtn" style="background:#555; display:none;" onclick="cancelPlaylistEdit()">Cancel Edit</button>
+                    </div>
+                </div>
+                <div class="admin-card">
+                    <h3>📋 Registered Playlists</h3>
+                    <div id="playlistsList"></div>
+                </div>
+            </div>
+
+            <div id="uploadm3uTab" class="admin-tab-content" style="display:none;">
+                <div class="admin-card">
+                    <h3>📂 Upload M3U Only</h3>
+                    <p style="font-size:12px; margin-bottom:12px; opacity:0.7;">Upload local M3U playlist files dynamically here. Sync occurs automatically.</p>
+                    
+                    <div id="m3uFileUploadContainer">
+                        <label style="font-size:12px; display:block; margin-bottom:4px; opacity:0.8;">Upload Destination Type:</label>
+                        <select id="newFileUploadVisibility" class="admin-input" style="margin-bottom:12px;">
+                            <option value="main">📢 Main Uploading (Visible to Everyone)</option>
+                            <option value="just">🔒 Just Uploading (Visible to Super Users & Admins Only)</option>
+                        </select>
+                        <input type="file" id="m3uFileUpload" accept=".m3u,.m3u8,.txt,application/vnd.apple.mpegurl" style="margin-bottom:12px; background:rgba(255,255,255,0.1); padding:10px; border-radius:12px; width:100%;">
+                        <button class="admin-btn" onclick="uploadM3UFile()">⬆️ Upload & Parse File</button>
+                    </div>
+                    
+                    <div id="uploadResult" style="margin-top: 15px;"></div>
+                </div>
+                <div class="admin-card">
+                    <h3>📁 Managed M3U Files</h3>
+                    <div id="uploadedFilesList"></div>
+                </div>
+            </div>
+
+            <div id="analyticsTab" class="admin-tab-content" style="display:none;">
+                <div class="admin-card">
+                    <h3>📊 Live Usage Analytics</h3>
+                    <div class="stats-row">
+                        <div class="stat-card"><div class="stat-number" id="statToday">0</div><div class="stat-label">Today (Last 24h)</div></div>
+                        <div class="stat-card"><div class="stat-number" id="statThisHour">0</div><div class="stat-label">This Hour</div></div>
+                        <div class="stat-card"><div class="stat-number" id="statThisWeek">0</div><div class="stat-label">This Week</div></div>
+                        <div class="stat-card"><div class="stat-number" id="statThisMonth">0</div><div class="stat-label">This Month</div></div>
+                        <div class="stat-card"><div class="stat-number" id="statTotal">0</div><div class="stat-label">Total All Time</div></div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <h4 style="font-size:14px;">📅 Detailed Timeline (Last 7 days)</h4>
+                        <div id="weeklyChart" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+                    <button class="admin-btn admin-btn-small" id="resetAnalyticsBtn" style="margin-top:10px;" onclick="resetAnalytics()">Reset Analytics</button>
+                </div>
+            </div>
+
+            <div id="channelsTab" class="admin-tab-content" style="display:none;"><div class="admin-card"><h3>📺 All Channels</h3><input type="text" id="adminChannelSearch" class="admin-input" placeholder="Search..." oninput="searchAdminChannels()"><div id="adminChannelsStats"></div><div id="adminChannelsList" class="admin-channels-container"></div><div id="adminChannelsPagination"></div></div></div>
+            <div id="deletedTab" class="admin-tab-content" style="display:none;"><div class="admin-card"><h3>🗑️ Deleted Channels</h3><div id="deletedChannelsList"></div></div></div>
+            
+            <div id="categoriesTab" class="admin-tab-content" style="display:none;">
+                <div class="admin-card">
+                    <h3>🏷️ Manage Categories</h3>
+                    <div id="categoryInputContainer">
+                        <input type="text" id="newCategoryName" class="admin-input" placeholder="New Category">
+                        <button class="admin-btn" onclick="addNewCategory()">Add</button>
+                    </div>
+                    <div id="adminCategoriesList" style="margin-top:12px;"></div>
+                </div>
+            </div>
+            
+            <div id="usersTab" class="admin-tab-content" style="display:none;">
+                <div class="admin-card">
+                    <h3>👥 User Management</h3>
+                    <div id="userInputContainer">
+                        <input type="text" id="newUserName" placeholder="Username" class="admin-input">
+                        <input type="password" id="newUserPass" placeholder="Password" class="admin-input">
+                        <select id="newUserRole" class="admin-input" style="margin-bottom:8px;">
+                            <option value="admin">🛡️ Admin (Full Permissions)</option>
+                            <option value="superuser">👁️ Super User / Checker (Read Only)</option>
+                        </select>
+                        <button class="admin-btn" onclick="addNewUser()">Add User</button>
+                    </div>
+                    <div id="adminUsersList" style="margin-top: 12px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- FIXED TOP MENU BAR -->
+        <div class="menu-bar">
+            <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+            <div class="app-title-menu">Malayalam IPTV</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="settings-btn" onclick="openSettingsSheet()" title="Settings">⚙️ Settings</button>
+                <div class="user-icon" id="userIconBtn" style="font-size: 20px;" onclick="openLoginModal()" title="Login">👤</div>
+            </div>
+        </div>
+
+        <!-- FIXED VIDEO PLAYER (Positions directly under menu bar, takes up ~half screen height when open) -->
+        <div class="player-container" id="playerContainer">
+            <div class="close-player" onclick="closePlayer()">✕</div>
+            <button class="fullscreen-btn" onclick="togglePlayerFullscreen()" title="Fullscreen">⛶</button>
+            <div class="video-wrapper">
+                <video id="videoPlayer" controls playsinline></video>
+                <div id="playerStatusOverlay" class="player-status-overlay">Loading...</div>
+            </div>
+            <div class="player-controls-bar">
+                <div class="control-group">
+                    <label>Speed:</label>
+                    <select id="speedSelect" class="player-select" onchange="changePlaybackSpeed()">
+                        <option value="0.5">0.5x</option>
+                        <option value="1.0" selected>1.0x (Normal)</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2.0">2.0x</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Quality:</label>
+                    <select id="qualitySelect" class="player-select" onchange="changeVideoQuality()">
+                        <option value="auto">Auto Quality</option>
+                    </select>
+                </div>
+                <button class="retry-btn" onclick="retryStream()">🔄 Retry Stream</button>
+            </div>
+        </div>
+
+        <!-- MAIN SCROLLABLE WRAPPER (Occupies remaining space below top elements) -->
+        <div class="main-scrollable-content" id="mainContentScroller">
+            <div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 Search channels..."></div>
+            
+            <!-- SEGMENTED NAVIGATION TAB BAR -->
+            <div class="tab-bar">
+                <button class="tab active" id="tab_live" onclick="switchSection('live')">📺 Live TV</button>
+                <button class="tab" id="tab_movie" onclick="switchSection('movie')">🎬 Movies</button>
+                <button class="tab" id="tab_series" onclick="switchSection('series')">🍿 Series</button>
+                <button class="tab" id="tab_favorites" onclick="switchSection('favorites')">⭐ Favorites</button>
+            </div>
+
+            <div class="categories-bar" id="categoriesBar"></div>
+            
+            <div id="channelsPanel" class="panel active">
+                <div id="channelsGrid" class="channels-grid">
+                    <div class="loading-state">Loading channels...</div>
+                </div>
+            </div>
+            
+            <div id="favoritesPanel" class="panel">
+                <div id="favoritesGrid" class="channels-grid">
+                    <div class="empty-state">No favorites yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="menu-item" onclick="navigateTo('live')">📺 Live TV</div>
+        <div class="menu-item" onclick="navigateTo('movie')">🎬 Movies</div>
+        <div class="menu-item" onclick="navigateTo('series')">🍿 Series</div>
+        <div class="menu-item" onclick="navigateTo('favorites')">⭐ My Favorites</div>
+        <div class="menu-item" onclick="openPlayerSettingsModal()">⚙️ Player Setup</div>
+        <div class="menu-item" id="adminMenuItem" style="display: none;" onclick="openAdminPanel()">🛡️ Admin Panel</div>
+        <div class="menu-item" id="loginMenuItem" onclick="openLoginModal()">🔑 Login</div>
+        <div class="menu-item" id="logoutMenuItem" style="display: none;" onclick="logout()">🚪 Logout</div>
+    </div>
+
+    <!-- ===================== SETTINGS SHEET ===================== -->
+    <div class="settings-sheet-overlay" id="settingsSheetOverlay" onclick="closeSettingsSheetOnBg(event)">
+        <div class="settings-sheet" id="settingsSheet">
+            <div class="settings-handle"><div class="settings-handle-bar"></div></div>
+            <div class="settings-header">
+                <h2>⚙️ Settings</h2>
+                <button class="settings-close-btn" onclick="closeSettingsSheet()">✕</button>
+            </div>
+
+            <!-- PLAYER -->
+            <div class="settings-section-label">Player</div>
+            <div class="settings-row">
+                <div class="settings-row-left">
+                    <div class="settings-row-icon">🎬</div>
+                    <div class="settings-row-text">
+                        <strong>Playback Player</strong>
+                        <span>Where streams are opened</span>
+                    </div>
+                </div>
+                <select id="settingsPlayerPref" onchange="savePlayerPreference(this.value)">
+                    <option value="internal">In-App Player</option>
+                    <option value="vlc">VLC Player</option>
+                    <option value="mx">MX Player</option>
+                </select>
+            </div>
+
+            <!-- DISPLAY -->
+            <div class="settings-section-label">Display</div>
+            <div class="settings-row">
+                <div class="settings-row-left">
+                    <div class="settings-row-icon">🏠</div>
+                    <div class="settings-row-text">
+                        <strong>Default Tab</strong>
+                        <span>Tab shown on startup</span>
+                    </div>
+                </div>
+                <select id="settingsDefaultTab" onchange="saveDefaultTab(this.value)">
+                    <option value="live">Live TV</option>
+                    <option value="movie">Movies</option>
+                    <option value="series">Series</option>
+                    <option value="favorites">Favorites</option>
+                </select>
+            </div>
+            <div class="settings-row">
+                <div class="settings-row-left">
+                    <div class="settings-row-icon">📐</div>
+                    <div class="settings-row-text">
+                        <strong>Grid Columns</strong>
+                        <span>Cards per row</span>
+                    </div>
+                </div>
+                <select id="settingsGridSize" onchange="saveGridSize(this.value)">
+                    <option value="auto">Auto</option>
+                    <option value="2">2 Columns</option>
+                    <option value="3">3 Columns</option>
+                    <option value="4">4 Columns</option>
+                </select>
+            </div>
+            <div class="settings-row">
+                <div class="settings-row-left">
+                    <div class="settings-row-icon">🖥️</div>
+                    <div class="settings-row-text">
+                        <strong>Display Mode</strong>
+                        <span>Mobile: compact touch layout · TV: large tiles &amp; big player</span>
+                    </div>
+                </div>
+                <select id="settingsDisplayMode" onchange="applyDisplayMode(this.value)">
+                    <option value="mobile">📱 Mobile</option>
+                    <option value="tv">🖥️ TV Mode</option>
+                </select>
+            </div>
+
+            <!-- ACCOUNT -->
+            <div class="settings-section-label">Account</div>
+            <div class="settings-row" id="settingsLoginRow">
+                <div class="settings-row-left">
+                    <div class="settings-row-icon">👤</div>
+                    <div class="settings-row-text">
+                        <strong id="settingsUserLabel">Not logged in</strong>
+                        <span id="settingsUserSub">Tap to sign in</span>
+                    </div>
+                </div>
+                <button class="settings-action-btn" id="settingsAuthBtn" onclick="settingsAuthAction()">Login</button>
+            </div>
+
+            <!-- DATA -->
+            <div class="settings-section-label">Data</div>
+            <div class="settings-row">
+                <div class="settings-row-left">
+                    <div class="settings-row-icon">🔄</div>
+                    <div class="settings-row-text">
+                        <strong>Refresh Channels</strong>
+                        <span>Re-fetch all playlists</span>
+                    </div>
+                </div>
+                <button class="settings-action-btn" onclick="loadChannels(); closeSettingsSheet();">Refresh</button>
+            </div>
+            <div class="settings-row">
+                <div class="settings-row-left">
+                    <div class="settings-row-icon">🗑️</div>
+                    <div class="settings-row-text">
+                        <strong>Clear Cache</strong>
+                        <span>Remove stored channel data</span>
+                    </div>
+                </div>
+                <button class="settings-action-btn danger" onclick="clearCache()">Clear</button>
+            </div>
+
+            <!-- ABOUT -->
+            <div class="settings-section-label">About</div>
+            <div class="settings-row">
+                <div class="settings-row-left">
+                    <div class="settings-row-icon">📺</div>
+                    <div class="settings-row-text">
+                        <strong>Malayalam IPTV</strong>
+                        <span>Premium Stream Hub v3.1</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN PANEL BUTTON (visible to admins and super users) -->
+            <div id="settingsAdminBlock" style="display:none;">
+                <div class="settings-section-label">Admin</div>
+                <div class="settings-admin-btn" onclick="openAdminPanel(); closeSettingsSheet();">
+                    <div class="settings-admin-btn-left">
+                        <div class="adm-icon">🛡️</div>
+                        <div>
+                            <strong>Admin Dashboard</strong>
+                            <span>Browse, analyze, and manage active feeds</span>
+                        </div>
+                    </div>
+                    <div class="settings-admin-btn-arrow">›</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        //  FIREBASE REALTIME DATABASE — SHARED DATABASE
+        //  Database: https://webapp-database-aa250-default-rtdb.firebaseio.com
+        //  Project:  webapp-database-aa250
+        // ═══════════════════════════════════════════════════════════
+
+        // ── Firebase Realtime Database helpers ──────────────────────
+        const fbReady = () => window._fbReady === true;
+
+        async function fbGet(path) {
+            if (!fbReady()) return null;
+            return await window._fbRead(path);
+        }
+
+        async function fbSet(path, value) {
+            if (!fbReady()) return false;
+            return await window._fbWrite(path, value);
+        }
+
+        // Load shared config from DB path: iptv/config
+        async function fbLoadConfig() {
+            let data = await fbGet('iptv/config');
+            if (data) {
+                if (data.playlists) {
+                    playlists = data.playlists;
+                    localStorage.setItem('iptv_playlists', JSON.stringify(playlists));
+                }
+                if (data.deletedChannels) {
+                    deletedChannels = data.deletedChannels;
+                    localStorage.setItem('iptv_deleted_channels', JSON.stringify(deletedChannels));
+                }
+                if (data.categories) {
+                    categories = data.categories;
+                    localStorage.setItem('iptv_categories', JSON.stringify(categories));
+                }
+                return true;
+            }
+            return false;
+        }
+
+        // Save config changes to Firebase
+        async function fbSaveConfig() {
+            localStorage.setItem('iptv_playlists',        JSON.stringify(playlists));
+            localStorage.setItem('iptv_deleted_channels', JSON.stringify(deletedChannels));
+            localStorage.setItem('iptv_categories',       JSON.stringify(categories));
+            if (fbReady()) {
+                await fbSet('iptv/config', {
+                    playlists,
+                    deletedChannels,
+                    categories,
+                    updatedAt: new Date().toISOString()
+                });
+            }
+        }
+
+        // Real-time listener — updates local state automatically
+        function fbListen() {
+            if (!fbReady()) return;
+            window._fbListen('iptv/config', (data) => {
+                if (!data) return;
+                if (Array.isArray(data.playlists))       playlists       = data.playlists;
+                if (Array.isArray(data.deletedChannels)) deletedChannels = data.deletedChannels;
+                if (Array.isArray(data.categories))      categories      = data.categories;
+                localStorage.setItem('iptv_playlists',        JSON.stringify(playlists));
+                localStorage.setItem('iptv_deleted_channels', JSON.stringify(deletedChannels));
+                localStorage.setItem('iptv_categories',       JSON.stringify(categories));
+                loadChannels(true);
+            });
+        }
+
+        // ── SMART HEURISTIC TYPE CLASSIFIER ─────────────────────────
+        function classifyChannel(channel) {
+            let name = (channel.name || '').toLowerCase();
+            let cat = (channel.category || '').toLowerCase();
+            
+            // Series classification indicators
+            if (cat.includes('series') || cat.includes('season') || cat.includes('s0') || cat.includes('s1') || cat.includes('show') || cat.includes('episode') || cat.includes('tvshow') || cat.includes('tv-show') || cat.includes('tv series') ||
+                name.includes('s01') || name.includes('s02') || name.includes('s03') || name.includes('s04') || name.includes('s05') ||
+                name.includes('s06') || name.includes('s07') || name.includes('s08') || name.includes('s09') || name.includes('season') ||
+                name.includes('episode') || name.includes('complete series')) {
+                return 'series';
+            }
+            
+            // Movie classification indicators
+            if (cat.includes('movie') || cat.includes('cinema') || cat.includes('film') || cat.includes('vod') || cat.includes('action') || cat.includes('comedy') || cat.includes('thriller') || cat.includes('horror') || cat.includes('drama') || cat.includes('romance') || cat.includes('adventure') || cat.includes('sci-fi') || cat.includes('animation') || cat.includes('documentary') || cat.includes('fiction') || cat.includes('bollywood') || cat.includes('hollywood') || cat.includes('mollywood') || cat.includes('tollywood') ||
+                name.includes('movie') || name.includes('(20') || name.includes('(19') || name.includes('vod') || name.includes('fhd movie') || name.includes('hd movie')) {
+                return 'movie';
+            }
+            
+            // Default falls back to live TV streams
+            return 'live';
+        }
+
+        // ── USER VISIBILITY PERMISSIONS HELPER ──────────────────────
+        function isPlaylistVisible(pl) {
+            if (!pl) return false;
+            // Just Uploading data is visible to admins and superusers/checkers only
+            if (pl.visibility === 'just') {
+                return currentUser && (currentUser.role === 'admin' || currentUser.role === 'superuser');
+            }
+            // Main Uploading data is visible to everyone (including guests)
+            return true;
+        }
+
+        // ── DATA VARIABLES ─────────────────────────────────────────
+        let playlists       = JSON.parse(localStorage.getItem('iptv_playlists')       || '[]');
+        let allChannels     = JSON.parse(localStorage.getItem('iptv_all_channels')    || '[]');
+        let deletedChannels = JSON.parse(localStorage.getItem('iptv_deleted_channels')|| '[]');
+        let categories      = JSON.parse(localStorage.getItem('iptv_categories')      || '["All"]');
+
+        // Dynamic Database Verified Session Model
+        let currentUser = JSON.parse(localStorage.getItem('iptv_current_user') || '{"username":"guest","role":"guest"}');
+        let favorites = [];
+        let currentSection = localStorage.getItem('iptv_current_section') || 'live';
+        let currentCategory = "All";
+        let activeChannelId = null;
+        let uploadedFiles    = JSON.parse(localStorage.getItem('iptv_uploaded_m3u_files') || '[]');
+        let analyticsData    = JSON.parse(localStorage.getItem('iptv_analytics') || '{"visits":[],"total":0}');
+        let displayedChannels = [], currentMainPage = 0, MAIN_PAGE_SIZE = 24, isLoadingMain = false, hasMoreMain = true;
+        let adminCurrentPage = 1, adminFilteredChannels = [], ADMIN_PAGE_SIZE = 30;
+        let hlsInstance = null;
+
+        // ==================== ANALYTICS TRACKING ====================
+        function trackVisit() {
+            let now = new Date();
+            let timestamp = now.toISOString();
+            analyticsData.visits.push(timestamp);
+            analyticsData.total = analyticsData.visits.length;
+            let thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            analyticsData.visits = analyticsData.visits.filter(t => new Date(t) > thirtyDaysAgo);
+            localStorage.setItem('iptv_analytics', JSON.stringify(analyticsData));
+        }
+
+        function getAnalyticsStats() {
+            let now = new Date();
+            let today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            let thisHour = new Date(); thisHour.setHours(now.getHours(), 0, 0, 0);
+            let weekAgo = new Date(); weekAgo.setDate(now.getDate() - 7);
+            let monthAgo = new Date(); monthAgo.setMonth(now.getMonth() - 1);
+            
+            let todayCount = 0, hourCount = 0, weekCount = 0, monthCount = 0;
+            analyticsData.visits.forEach(ts => {
+                let date = new Date(ts);
+                if (date >= today) todayCount++;
+                if (date >= thisHour) hourCount++;
+                if (date >= weekAgo) weekCount++;
+                if (date >= monthAgo) monthCount++;
+            });
+            return { today: todayCount, hour: hourCount, week: weekCount, month: monthCount, total: analyticsData.total };
+        }
+
+        function renderAnalytics() {
+            let stats = getAnalyticsStats();
+            document.getElementById('statToday').innerText = stats.today;
+            document.getElementById('statThisHour').innerText = stats.hour;
+            document.getElementById('statThisWeek').innerText = stats.week;
+            document.getElementById('statThisMonth').innerText = stats.month;
+            document.getElementById('statTotal').innerText = stats.total;
+            
+            let weeklyMap = {};
+            for(let i=0;i<7;i++){
+                let d = new Date(); d.setDate(d.getDate() - i);
+                let key = d.toLocaleDateString();
+                weeklyMap[key] = 0;
+            }
+            analyticsData.visits.forEach(ts => {
+                let d = new Date(ts).toLocaleDateString();
+                if(weeklyMap[d] !== undefined) weeklyMap[d]++;
+            });
+            let chartHtml = '<div style="display:flex; flex-direction:column; gap:6px;">';
+            Object.entries(weeklyMap).reverse().forEach(([date, count]) => {
+                let barWidth = Math.min(100, count * 3);
+                chartHtml += `<div style="display:flex; align-items:center; gap:8px;"><span style="width:90px; font-size:11px;">${date}</span><div style="flex:1; background:rgba(255,255,255,0.2); border-radius:10px; overflow:hidden;"><div style="width:${barWidth}%; background:linear-gradient(90deg,#ff6b6b,#ee5a24); height:24px; border-radius:10px; display:flex; align-items:center; padding-left:8px; font-size:11px;">${count}</div></div></div>`;
+            });
+            chartHtml += '</div>';
+            document.getElementById('weeklyChart').innerHTML = chartHtml || '<div class="empty-state">No data yet</div>';
+        }
+
+        function resetAnalytics() {
+            if(confirm('Reset all visitor analytics data?')) {
+                analyticsData = { visits: [], total: 0 };
+                localStorage.setItem('iptv_analytics', JSON.stringify(analyticsData));
+                renderAnalytics();
+            }
+        }
+
+        // ==================== M3U UPLOAD HANDLERS ====================
+        function uploadM3UFile() {
+            let fileInput = document.getElementById('m3uFileUpload');
+            let vis = document.getElementById('newFileUploadVisibility').value;
+            if(!fileInput.files || fileInput.files.length === 0) { alert("Select an .m3u file"); return; }
+            let file = fileInput.files[0];
+            let reader = new FileReader();
+            reader.onload = async function(e) {
+                let content = e.target.result;
+                let fileId = 'upload_' + Date.now();
+                
+                let streams = parseM3U(content, 'pl_f_' + fileId);
+                if(streams.length === 0) {
+                    alert("No valid streams found! Verify your M3U layout structure contains #EXTINF tags.");
+                    return;
+                }
+                
+                localStorage.setItem(`backup_${fileId}`, JSON.stringify(streams));
+                
+                let fileEntry = { id: fileId, name: file.name, count: streams.length, createdAt: new Date().toISOString() };
+                uploadedFiles.push(fileEntry);
+                localStorage.setItem('iptv_uploaded_m3u_files', JSON.stringify(uploadedFiles));
+                
+                playlists.push({ id: 'pl_f_' + fileId, name: `📁 ${file.name}`, type: 'file_m3u', url: 'local_memory_parsed', fileId: fileId, enabled: true, visibility: vis });
+                await fbSaveConfig();
+                
+                document.getElementById('uploadResult').innerHTML = `<div style="background:rgba(255,255,255,0.1); border-radius:12px; padding:12px; color:#4CAF50;">✅ Successfully imported ${streams.length} channels from local file!</div>`;
+                
+                renderUploadedFilesList();
+                loadPlaylistsList();
+                await loadChannels();
+                fileInput.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function renderUploadedFilesList() {
+            let container = document.getElementById('uploadedFilesList');
+            if(!uploadedFiles.length) { container.innerHTML = '<div class="empty-state">No uploaded M3U files yet</div>'; return; }
+            
+            let isAdmin = currentUser && currentUser.role === 'admin';
+            
+            container.innerHTML = uploadedFiles.map(f => {
+                let pl = playlists.find(p => p.fileId === f.id);
+                let visLabel = pl && pl.visibility === 'just' ? '🔒 Just Upload' : '📢 Main Upload';
+                let deleteBtn = isAdmin ? `<button class="admin-btn-small" style="background:#f44336;" onclick="deleteUploadedFile('${f.id}')">Delete</button>` : '';
+                return `
+                <div class="file-item">
+                    <div>
+                        <strong>${escapeHtml(f.name)}</strong> <span style="font-size:10px; opacity:0.6; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:10px;">${visLabel}</span>
+                        <br><small>${f.count} Channels Loaded • ${new Date(f.createdAt).toLocaleDateString()}</small>
+                    </div>
+                    <div>${deleteBtn}</div>
+                </div>`;
+            }).join('');
+        }
+
+        async function deleteUploadedFile(fileId) {
+            if(confirm(`Completely remove this file and its channels?`)) {
+                uploadedFiles = uploadedFiles.filter(f => f.id !== fileId);
+                localStorage.setItem('iptv_uploaded_m3u_files', JSON.stringify(uploadedFiles));
+                playlists = playlists.filter(p => p.fileId !== fileId);
+                await fbSaveConfig();
+                localStorage.removeItem(`backup_${fileId}`);
+                renderUploadedFilesList();
+                loadPlaylistsList();
+                await loadChannels();
+            }
+        }
+
+        // ==================== CORE INIT ====================
+        async function init() {
+            trackVisit();
+            updateAuthUI();
+            
+            // Set internal playback player default safely
+            let playerPref = localStorage.getItem('iptv_player_preference');
+            if (!playerPref) {
+                playerPref = 'internal';
+                localStorage.setItem('iptv_player_preference', 'internal');
+            }
+            let sel = document.querySelector(`input[name="playerPref"][value="${playerPref}"]`);
+            if (sel) sel.checked = true;
+
+            // INSTANT CACHE LOADING: Uses stored catalog for instant start
+            if (allChannels && allChannels.length > 0) {
+                allChannels.forEach(c => {
+                    if (!c.sectionType) c.sectionType = classifyChannel(c);
+                });
+                updateCategoriesFromChannels();
+                resetMainDisplay();
+            }
+
+            loadFavorites();
+            setupInfiniteScroll();
+
+            // Wait for Firebase to connect
+            await new Promise(resolve => {
+                if (window._fbReady !== undefined) { resolve(); return; }
+                let t = setTimeout(resolve, 3000);
+                window.addEventListener('firebase-ready', () => { clearTimeout(t); resolve(); });
+            });
+
+            // Sync shared database values
+            let fromCloud = await fbLoadConfig();
+            if (fromCloud) {
+                updateCategoriesFromChannels();
+            }
+
+            fbListen();
+
+            // Silently update active playlists in background
+            loadChannels(true);
+
+            document.getElementById('searchInput').addEventListener('input', () => resetMainDisplay());
+
+            let gs = localStorage.getItem('iptv_grid_size') || 'auto';
+            applyGridSize(gs);
+            loadDisplayMode();
+
+            let savedSec = localStorage.getItem('iptv_current_section') || 'live';
+            switchSection(savedSec);
+        }
+
+        async function loadChannels(isBackground = false) {
+            const activePlaylists = playlists.filter(p => p.enabled);
+            
+            if(activePlaylists.length === 0) { 
+                allChannels = []; 
+                localStorage.setItem('iptv_all_channels', '[]'); 
+                document.getElementById('channelsGrid').innerHTML = '<div class="empty-state">No active playlists enabled. Go to Admin Panel to activate or add playlists.</div>'; 
+                updateCategoriesFromChannels();
+                resetMainDisplay();
+                return; 
+            }
+            
+            if (!isBackground && allChannels.length === 0) {
+                document.getElementById('channelsGrid').innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Synchronizing active feeds...</p></div>';
+            }
+            
+            let merged = [];
+            for(let pl of activePlaylists) {
+                if (pl.type === 'file_m3u') {
+                    let rawBackup = localStorage.getItem(`backup_${pl.fileId}`);
+                    if(rawBackup) {
+                        try {
+                            let parsed = JSON.parse(rawBackup);
+                            parsed.forEach(c => c.sectionType = classifyChannel(c));
+                            merged.push(...parsed);
+                        } catch(e) {
+                            console.error("Local load error: ", e);
+                        }
+                    }
+                } else if(pl.type === 'm3u' && pl.url) {
+                    try { 
+                        let resp = await fetch(pl.url); 
+                        let txt = await resp.text(); 
+                        let parsed = parseM3U(txt, pl.id);
+                        parsed.forEach(c => c.sectionType = classifyChannel(c));
+                        merged.push(...parsed);
+                    } catch(e) { 
+                        console.warn("Could not retrieve remote feed link: ", pl.url, e); 
+                        let localFallback = JSON.parse(localStorage.getItem('iptv_all_channels') || '[]').filter(c => c.playlistId === pl.id);
+                        if (localFallback.length > 0) {
+                            localFallback.forEach(c => c.sectionType = classifyChannel(c));
+                            merged.push(...localFallback);
+                        }
+                    }
+                }
+            }
+            
+            allChannels = merged;
+            localStorage.setItem('iptv_all_channels', JSON.stringify(allChannels));
+            updateCategoriesFromChannels();
+            resetMainDisplay();
+        }
+
+        function parseM3U(content, playlistId) {
+            let lines = content.split(/\r?\n/); 
+            let channels = [], idx = 0;
+            
+            for(let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if(line.startsWith('#EXTINF:')) {
+                    let nameMatch = line.match(/#EXTINF:.*?,\s*(.+)/); 
+                    let name = nameMatch ? nameMatch[1] : 'Unknown Stream Channel';
+                    let logoMatch = line.match(/tvg-logo="([^"]*)"/); 
+                    let logo = logoMatch ? logoMatch[1] : null;
+                    let groupMatch = line.match(/group-title="([^"]*)"/); 
+                    let group = groupMatch ? groupMatch[1] : 'General';
+                    
+                    let streamUrl = "";
+                    for(let j = i + 1; j < lines.length; j++) {
+                        let candidate = lines[j].trim();
+                        if(!candidate) continue; 
+                        if(candidate.startsWith('#')) {
+                            if(candidate.startsWith('#EXTGRP:') && group === 'General') {
+                                group = candidate.replace('#EXTGRP:', '').trim();
+                            }
+                            continue; 
+                        }
+                        if(/^(http|https|rtmp|rtsp):\/\//i.test(candidate)) {
+                            streamUrl = candidate;
+                            i = j; 
+                            break;
+                        }
+                    }
+                    
+                    if(streamUrl) {
+                        let chObj = { 
+                            id: `ch_${playlistId}_${idx++}_${Date.now()}`, 
+                            name: name.substring(0, 70), 
+                            logo, 
+                            category: group.trim() || 'General', 
+                            url: streamUrl, 
+                            playlistId, 
+                            enabled: true 
+                        };
+                        chObj.sectionType = classifyChannel(chObj);
+                        channels.push(chObj);
+                    }
+                }
+            }
+            
+            if(String(playlistId).startsWith('pl_f_')) {
+                let coreId = playlistId.replace('pl_f_', '');
+                localStorage.setItem(`backup_${coreId}`, JSON.stringify(channels));
+            }
+            
+            return channels;
+        }
+
+        // Consolidated Display Filters
+        function resetMainDisplay() {
+            let term = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = allChannels.filter(c => {
+                if (deletedChannels.some(d => d.id === c.id)) return false;
+                
+                // Security Check: Hide target "Just Uploading" playlists from Guests
+                let pl = playlists.find(p => p.id === c.playlistId);
+                if (!isPlaylistVisible(pl)) return false;
+
+                // Section Selector (Live, Movies, Series, Favorites)
+                if (currentSection === 'favorites') {
+                    if (!favorites.includes(c.id)) return false;
+                } else {
+                    if (c.sectionType !== currentSection) return false;
+                }
+                
+                // Category Filter
+                if (currentCategory !== "All" && c.category !== currentCategory) return false;
+                
+                // Text Search Query Filter
+                if (term && !c.name.toLowerCase().includes(term)) return false;
+                
+                return true;
+            });
+
+            displayedChannels = filtered; 
+            currentMainPage = 0; 
+            hasMoreMain = true; 
+            
+            let grid = document.getElementById('channelsGrid'); 
+            grid.innerHTML = '';
+            if(!displayedChannels.length) { grid.innerHTML = '<div class="empty-state">No content found inside this section.</div>'; return; }
+            
+            loadMoreMainChannels();
+        }
+
+        function loadMoreMainChannels() {
+            if(isLoadingMain) return;
+            isLoadingMain = true;
+            
+            let start = currentMainPage * MAIN_PAGE_SIZE;
+            let end = start + MAIN_PAGE_SIZE;
+            let slice = displayedChannels.slice(start, end);
+            let grid = document.getElementById('channelsGrid');
+            
+            let oldTrigger = grid.querySelector('.loading-trigger');
+            if(oldTrigger) oldTrigger.remove();
+            
+            if (slice.length === 0) {
+                isLoadingMain = false;
+                hasMoreMain = false;
+                return;
+            }
+
+            let idx = 0;
+            function renderOneByOne() {
+                if(idx < slice.length) {
+                    grid.appendChild(createChannelCard(slice[idx]));
+                    idx++;
+                    requestAnimationFrame(renderOneByOne);
+                } else {
+                    currentMainPage++; 
+                    hasMoreMain = end < displayedChannels.length;
+                    
+                    if(hasMoreMain) { 
+                        let trigger = document.createElement('div'); 
+                        trigger.className = 'loading-trigger'; 
+                        trigger.innerHTML = '<div class="spinner"></div>'; 
+                        grid.appendChild(trigger); 
+                    }
+                    isLoadingMain = false;
+                    setTimeout(checkAndLoadMore, 100);
+                }
+            }
+            renderOneByOne();
+        }
+
+        function checkAndLoadMore() {
+            let panel = document.getElementById('mainContentScroller');
+            if (panel.scrollHeight <= panel.clientHeight + 200 && !isLoadingMain && hasMoreMain) {
+                loadMoreMainChannels();
+            }
+        }
+
+        function createChannelCard(channel) {
+            let div = document.createElement('div'); div.className = 'channel-card';
+            let isFav = favorites.includes(channel.id);
+            div.innerHTML = `<div class="fav-star" onclick="event.stopPropagation(); toggleFavorite('${channel.id}')">${isFav?'❤️':'⭐'}</div><div onclick="playChannel('${channel.id}')"><div class="channel-logo-wrapper">${channel.logo?`<img src="${channel.logo}" onerror="this.parentElement.innerHTML='📺'">`:'📺'}</div><div class="channel-name">${escapeHtml(channel.name)}</div></div>`;
+            return div;
+        }
+
+        // ==================== VIDEO PLAYER ENGINE WITH EXTERNAL PLAYER SCHEMES ====================
+        function playChannel(id) { 
+            activeChannelId = id;
+            let ch = allChannels.find(c => c.id === id); 
+            if(!ch?.url) { 
+                showPlayerStatus("Invalid stream source location link."); 
+                return; 
+            }
+            
+            // Playback player launcher preferences integration (Internal, VLC, MX)
+            let playerPref = localStorage.getItem('iptv_player_preference') || 'internal';
+            
+            if (playerPref === 'vlc') {
+                let cleanUrl = ch.url.replace(/^https?:\/\//, '');
+                let vlcUrl = ch.url.startsWith('https') ? `vlc://https://${cleanUrl}` : `vlc://http://${cleanUrl}`;
+                window.location.href = vlcUrl;
+                return;
+            } else if (playerPref === 'mx') {
+                let mxUrl = `intent:${ch.url}#Intent;package=com.mxtech.videoplayer.ad;S.title=${encodeURIComponent(ch.name)};end`;
+                window.location.href = mxUrl;
+                return;
+            } else if (playerPref === 'external') {
+                window.open(ch.url, '_blank');
+                return;
+            }
+            
+            // Internal Hls.js initialization sequence
+            let videoElement = document.getElementById('videoPlayer');
+            let playerContainer = document.getElementById('playerContainer');
+            let qualitySelect = document.getElementById('qualitySelect');
+            
+            playerContainer.classList.add('open');
+            showPlayerStatus("Loading channel stream...");
+            
+            if(hlsInstance) {
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
+            
+            qualitySelect.innerHTML = '<option value="auto">Auto Quality</option>';
+            document.getElementById('speedSelect').value = "1.0";
+
+            videoElement.onerror = function() {
+                showPlayerStatus("Playback failed. Stream is offline or blocked by CORS security parameters.");
+            };
+            videoElement.onplaying = function() {
+                hidePlayerStatus();
+            };
+            
+            if(ch.url.includes('.m3u8') || ch.url.toLowerCase().includes('type=m3u')) {
+                if(Hls.isSupported()) {
+                    hlsInstance = new Hls({ adaptiveMaxBufferLength: 30 });
+                    hlsInstance.loadSource(ch.url);
+                    hlsInstance.attachMedia(videoElement);
+                    
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                        videoElement.play().catch(err => {
+                            showPlayerStatus("Interaction needed to play stream.");
+                        });
+                        setupQualityMenu(hlsInstance.levels);
+                    });
+                    
+                    hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+                        if (data.fatal) {
+                            switch(data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    showPlayerStatus("Network Error: Verification check failed (CORS block or link down).");
+                                    hlsInstance.startLoad();
+                                    break;
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    showPlayerStatus("Media decode issues. Attempting recovery...");
+                                    hlsInstance.recoverMediaError();
+                                    break;
+                                default:
+                                    showPlayerStatus("Failure loading stream codec format.");
+                                    closePlayer();
+                                    break;
+                            }
+                        }
+                    });
+                } else if(videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+                    videoElement.src = ch.url;
+                    videoElement.addEventListener('loadedmetadata', function() {
+                        videoElement.play();
+                    });
+                } else {
+                    videoElement.src = ch.url;
+                    videoElement.play().catch(e => {
+                        showPlayerStatus("Unsupported browser format.");
+                    });
+                }
+            } else {
+                videoElement.src = ch.url;
+                videoElement.play().catch(e => {
+                    showPlayerStatus("Direct stream load failure.");
+                });
+            }
+        }
+
+        // Configuration preferences
+        function openPlayerSettingsModal() {
+            let playerPref = localStorage.getItem('iptv_player_preference') || 'internal';
+            let selector = document.querySelector(`input[name="playerPref"][value="${playerPref}"]`);
+            if (selector) selector.checked = true;
+            document.getElementById('playerSettingsModal').classList.add('active');
+            closeSidebar();
+        }
+        
+        function closePlayerSettingsModal() {
+            document.getElementById('playerSettingsModal').classList.remove('active');
+        }
+
+        function savePlayerPreference(value) {
+            localStorage.setItem('iptv_player_preference', value);
+            let r = document.querySelector(`input[name="playerPref"][value="${value}"]`);
+            if(r) r.checked = true;
+        }
+
+        // ==================== SETTINGS SHEET ====================
+        function openSettingsSheet() {
+            let pp = localStorage.getItem('iptv_player_preference') || 'internal';
+            document.getElementById('settingsPlayerPref').value = pp;
+
+            let dt = localStorage.getItem('iptv_default_tab') || 'live';
+            document.getElementById('settingsDefaultTab').value = dt;
+
+            let gs = localStorage.getItem('iptv_grid_size') || 'auto';
+            document.getElementById('settingsGridSize').value = gs;
+
+            let dm = localStorage.getItem('iptv_display_mode') || 'mobile';
+            document.getElementById('settingsDisplayMode').value = dm;
+
+            updateAuthUI();
+            document.getElementById('settingsSheetOverlay').classList.add('open');
+        }
+
+        function closeSettingsSheet() {
+            document.getElementById('settingsSheetOverlay').classList.remove('open');
+        }
+
+        function closeSettingsSheetOnBg(e) {
+            if(e.target === document.getElementById('settingsSheetOverlay')) closeSettingsSheet();
+        }
+
+        function saveDefaultTab(val) {
+            localStorage.setItem('iptv_default_tab', val);
+        }
+
+        function saveGridSize(val) {
+            localStorage.setItem('iptv_grid_size', val);
+            applyGridSize(val);
+        }
+
+        function applyGridSize(val) {
+            let grid = document.getElementById('channelsGrid');
+            let favGrid = document.getElementById('favoritesGrid');
+            let cols = { '2':'repeat(2,1fr)', '3':'repeat(3,1fr)', '4':'repeat(4,1fr)', 'auto':'repeat(auto-fill,minmax(140px,1fr))' };
+            let style = cols[val] || cols['auto'];
+            [grid, favGrid].forEach(g => { if(g) g.style.gridTemplateColumns = style; });
+        }
+
+        function settingsAuthAction() {
+            let logged = currentUser && currentUser.role !== 'guest';
+            if(logged) {
+                logout();
+                updateAuthUI();
+            } else {
+                closeSettingsSheet();
+                openLoginModal();
+            }
+        }
+
+        function clearCache() {
+            if(confirm('Clear all stored channel data? Playlists and users are kept.')) {
+                localStorage.removeItem('iptv_all_channels');
+                localStorage.removeItem('iptv_deleted_channels');
+                allChannels = [];
+                deletedChannels = [];
+                loadChannels();
+                closeSettingsSheet();
+            }
+        }
+
+        // ==================== DISPLAY MODE (MOBILE / TV) ====================
+        function applyDisplayMode(mode) {
+            localStorage.setItem('iptv_display_mode', mode);
+            if(mode === 'tv') {
+                document.body.classList.add('tv-mode');
+            } else {
+                document.body.classList.remove('tv-mode');
+            }
+            document.getElementById('settingsDisplayMode').value = mode;
+        }
+
+        function loadDisplayMode() {
+            let mode = localStorage.getItem('iptv_display_mode') || 'mobile';
+            applyDisplayMode(mode);
+        }
+
+        // ==================== FULLSCREEN PLAYER ====================
+        let isPlayerFullscreen = false;
+        function togglePlayerFullscreen() {
+            let container = document.getElementById('playerContainer');
+            isPlayerFullscreen = !isPlayerFullscreen;
+            if(isPlayerFullscreen) {
+                container.classList.add('fullscreen-active');
+                document.querySelector('.fullscreen-btn').textContent = '✕⛶';
+                document.querySelector('.fullscreen-btn').title = 'Exit Fullscreen';
+            } else {
+                container.classList.remove('fullscreen-active');
+                document.querySelector('.fullscreen-btn').textContent = '⛶';
+                document.querySelector('.fullscreen-btn').title = 'Fullscreen';
+            }
+        }
+
+        function changePlaybackSpeed() {
+            let videoElement = document.getElementById('videoPlayer');
+            let speed = document.getElementById('speedSelect').value;
+            videoElement.playbackRate = parseFloat(speed);
+        }
+
+        function retryStream() {
+            if (activeChannelId) {
+                playChannel(activeChannelId);
+            } else {
+                alert("Please select a channel stream first.");
+            }
+        }
+
+        function showPlayerStatus(msg) {
+            let overlay = document.getElementById('playerStatusOverlay');
+            overlay.innerHTML = `<div style="margin-bottom:10px;">${msg}</div><div style="font-size:11px; opacity:0.8;">💡 Tip: If you see CORS or network errors, verify your file playlist configurations or try loading with a local CORS browser extension active.</div>`;
+            overlay.style.display = 'flex';
+        }
+
+        function hidePlayerStatus() {
+            document.getElementById('playerStatusOverlay').style.display = 'none';
+        }
+
+        function setupQualityMenu(levels) {
+            let qualitySelect = document.getElementById('qualitySelect');
+            if(!levels || levels.length <= 1) return;
+            
+            levels.forEach((level, index) => {
+                let height = level.height ? level.height + 'p' : `Stream Level ${index}`;
+                let bitrate = level.bitrate ? Math.round(level.bitrate / 1000) + 'kbps' : '';
+                let option = document.createElement('option');
+                option.value = index;
+                option.innerText = `${height} (${bitrate})`;
+                qualitySelect.appendChild(option);
+            });
+        }
+
+        function changeVideoQuality() {
+            if(!hlsInstance) return;
+            let selection = document.getElementById('qualitySelect').value;
+            if(selection === 'auto') {
+                hlsInstance.currentLevel = -1; 
+            } else {
+                hlsInstance.currentLevel = parseInt(selection);
+            }
+        }
+        
+        function closePlayer() { 
+            let videoElement = document.getElementById('videoPlayer'); 
+            videoElement.pause(); 
+            if(hlsInstance) {
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
+            videoElement.src = ""; 
+            hidePlayerStatus();
+            document.getElementById('playerContainer').classList.remove('open'); 
+        }
+
+        function toggleFavorite(cid) { 
+            let idx = favorites.indexOf(cid); 
+            idx === -1 ? favorites.push(cid) : favorites.splice(idx, 1); 
+            localStorage.setItem(`favorites_${currentUser.username}`, JSON.stringify(favorites)); 
+            if (currentSection === 'favorites') {
+                updateCategoriesFromChannels();
+            }
+            resetMainDisplay(); 
+        }
+
+        function loadFavorites() { 
+            let f = localStorage.getItem(`favorites_${currentUser.username}`); 
+            favorites = f ? JSON.parse(f) : []; 
+            if (currentSection === 'favorites') {
+                updateCategoriesFromChannels();
+                resetMainDisplay();
+            }
+        }
+
+        // ==================== NAVIGATION AND TAB CONTROLLERS ====================
+        function switchSection(section) {
+            currentSection = section;
+            localStorage.setItem('iptv_current_section', section);
+            
+            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+            let targetTab = document.getElementById(`tab_${section}`);
+            if (targetTab) targetTab.classList.add('active');
+            
+            document.getElementById('channelsPanel').classList.add('active');
+            document.getElementById('favoritesPanel').classList.remove('active');
+
+            currentCategory = "All";
+            
+            updateCategoriesFromChannels();
+            resetMainDisplay();
+        }
+
+        function switchTab(tab) {
+            if (tab === 'channels') {
+                switchSection('live');
+            } else if (tab === 'favorites') {
+                switchSection('favorites');
+            } else {
+                switchSection(tab);
+            }
+        }
+
+        function updateCategoriesFromChannels() { 
+            let sectionFiltered = allChannels.filter(c => {
+                if (deletedChannels.some(d => d.id === c.id)) return false;
+                
+                // Visibility validation filter
+                let pl = playlists.find(p => p.id === c.playlistId);
+                if (!isPlaylistVisible(pl)) return false;
+
+                if (currentSection === 'favorites') {
+                    return favorites.includes(c.id);
+                }
+                return c.sectionType === currentSection;
+            });
+
+            let groups = ['All', ...new Set(sectionFiltered.map(c => c.category).filter(Boolean))]; 
+            categories = groups; 
+            localStorage.setItem('iptv_categories', JSON.stringify(categories)); 
+            loadCategories(); 
+        }
+        
+        function loadCategories() { 
+            let bar = document.getElementById('categoriesBar'); 
+            if (!categories.includes(currentCategory)) {
+                currentCategory = "All";
+            }
+            bar.innerHTML = categories.map(cat => `<div class="category-chip ${currentCategory===cat?'active':''}" onclick="filterByCategory('${cat}')">${cat}</div>`).join(''); 
+        }
+
+        function filterByCategory(cat) { currentCategory = cat; resetMainDisplay(); loadCategories(); }
+        
+        function setupInfiniteScroll() { 
+            let panel = document.getElementById('mainContentScroller'); 
+            panel.addEventListener('scroll', () => { 
+                if(panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 200 && !isLoadingMain && hasMoreMain) {
+                    loadMoreMainChannels(); 
+                }
+            }); 
+        }
+
+        // ==================== DASHBOARD PANEL OPERATIONS ====================
+        function applyAdminRoleVisibility() {
+            let isAdmin = currentUser && currentUser.role === 'admin';
+            let isSuper = currentUser && currentUser.role === 'superuser';
+            
+            document.getElementById('adminTitle').innerText = isSuper ? "Checker Dashboard" : "Admin Dashboard";
+
+            // Hide configuration write forms from Super Users
+            let plForm = document.getElementById('playlistFormContainer');
+            if (plForm) plForm.style.display = isAdmin ? 'block' : 'none';
+            
+            let uploadForm = document.getElementById('m3uFileUploadContainer');
+            if (uploadForm) uploadForm.style.display = isAdmin ? 'block' : 'none';
+            
+            let catInput = document.getElementById('categoryInputContainer');
+            if (catInput) catInput.style.display = isAdmin ? 'block' : 'none';
+            
+            let userInput = document.getElementById('userInputContainer');
+            if (userInput) userInput.style.display = isAdmin ? 'block' : 'none';
+            
+            let userTabBtn = document.getElementById('usersTabBtn');
+            if (userTabBtn) userTabBtn.style.display = isAdmin ? 'block' : 'none';
+
+            let resetAnalyticsBtn = document.getElementById('resetAnalyticsBtn');
+            if (resetAnalyticsBtn) resetAnalyticsBtn.style.display = isAdmin ? 'block' : 'none';
+        }
+
+        function openAdminPanel() { 
+            let isStaff = currentUser && (currentUser.role === 'admin' || currentUser.role === 'superuser');
+            if(!isStaff) { alert("Access denied."); return; } 
+            
+            document.getElementById('adminPanel').classList.add('active'); 
+            applyAdminRoleVisibility();
+            
+            loadPlaylistsList(); 
+            loadAdminChannelsPaginated(); 
+            loadDeletedChannelsList(); 
+            loadAdminCategoriesList(); 
+            loadAdminUsersList(); 
+            renderUploadedFilesList(); 
+            renderAnalytics(); 
+        }
+
+        function closeAdminPanel() { 
+            closeAdminPreview();
+            document.getElementById('adminPanel').classList.remove('active'); 
+        }
+        
+        function showAdminTab(tab) { 
+            document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active')); 
+            document.querySelectorAll('.admin-tab-content').forEach(c=>c.style.display='none'); 
+            event.target.classList.add('active'); 
+            document.getElementById(`${tab}Tab`).style.display='block'; 
+            if(tab==='channels') loadAdminChannelsPaginated(); 
+            if(tab==='analytics') renderAnalytics(); 
+            if(tab==='uploadm3u') renderUploadedFilesList(); 
+        }
+
+        // ==================== PLAYLIST EDIT / TOGGLE / ADD HANDLERS ====================
+        async function addM3UPlaylist() { 
+            let url = document.getElementById('newPlaylistUrl').value.trim();
+            let name = document.getElementById('newPlaylistName').value.trim(); 
+            let vis = document.getElementById('newPlaylistVisibility').value;
+            let editId = document.getElementById('editPlaylistId').value;
+            if(!url || !name) { alert("Fill all fields correctly."); return; } 
+
+            let btn = document.getElementById('playlistSubmitBtn');
+            btn.textContent = 'Saving…'; btn.disabled = true;
+            
+            if(editId) {
+                let pl = playlists.find(p => p.id === editId);
+                if(pl) { pl.name = name; pl.url = url; pl.visibility = vis; }
+                cancelPlaylistEdit();
+            } else {
+                playlists.push({ id: 'pl_' + Date.now(), name, type: 'm3u', url, enabled: true, visibility: vis });
+            }
+            
+            await fbSaveConfig();
+            btn.textContent = editId ? 'Save Changes' : 'Add Playlist'; btn.disabled = false;
+            document.getElementById('newPlaylistUrl').value = ''; 
+            document.getElementById('newPlaylistName').value = ''; 
+            loadPlaylistsList(); 
+            loadChannels(); 
+        }
+
+        function startPlaylistEdit(id) {
+            let pl = playlists.find(p => p.id === id);
+            if(!pl) return;
+            
+            document.getElementById('editPlaylistId').value = pl.id;
+            document.getElementById('newPlaylistName').value = pl.name;
+            document.getElementById('newPlaylistUrl').value = pl.url === 'local_memory_parsed' ? '' : pl.url;
+            document.getElementById('newPlaylistVisibility').value = pl.visibility || 'main';
+            
+            if(pl.type === 'file_m3u') {
+                document.getElementById('newPlaylistUrl').disabled = true;
+                document.getElementById('newPlaylistUrl').placeholder = "Local File channels contents - edit name only or reupload inside Files tab.";
+            } else {
+                document.getElementById('newPlaylistUrl').disabled = false;
+                document.getElementById('newPlaylistUrl').placeholder = "https://example.com/playlist.m3u";
+            }
+            
+            document.getElementById('formTitle').innerText = "✏️ Edit Playlist Specifications";
+            document.getElementById('playlistSubmitBtn').innerText = "Save Changes";
+            document.getElementById('playlistCancelBtn').style.display = "inline-block";
+            document.getElementById('playlistFormContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelPlaylistEdit() {
+            document.getElementById('editPlaylistId').value = '';
+            document.getElementById('newPlaylistName').value = '';
+            document.getElementById('newPlaylistUrl').value = '';
+            document.getElementById('newPlaylistUrl').disabled = false;
+            document.getElementById('newPlaylistUrl').placeholder = "https://example.com/playlist.m3u";
+            
+            document.getElementById('formTitle').innerText = "➕ Add M3U Playlist URL";
+            document.getElementById('playlistSubmitBtn').innerText = "Add Playlist";
+            document.getElementById('playlistCancelBtn').style.display = "none";
+        }
+
+        async function togglePlaylist(id) { 
+            let pl = playlists.find(p=>p.id===id); 
+            if(pl) { 
+                pl.enabled = !pl.enabled; 
+                await fbSaveConfig();
+                loadPlaylistsList(); 
+                loadChannels(); 
+            } 
+        }
+
+        async function deletePlaylist(id) { 
+            if(confirm("Remove this playlist? Channels will disappear for all users.")) {
+                let pl = playlists.find(p=>p.id===id); 
+                if(pl) { 
+                    if(pl.type === 'file_m3u') { 
+                        uploadedFiles = uploadedFiles.filter(f => f.id !== pl.fileId); 
+                        localStorage.setItem('iptv_uploaded_m3u_files', JSON.stringify(uploadedFiles)); 
+                        localStorage.removeItem(`backup_${pl.fileId}`); 
+                    } 
+                    playlists = playlists.filter(p=>p.id!==id); 
+                    await fbSaveConfig();
+                    if(document.getElementById('editPlaylistId').value === id) cancelPlaylistEdit();
+                    loadPlaylistsList(); 
+                    loadChannels(); 
+                    renderUploadedFilesList(); 
+                } 
+            }
+        }
+
+        function loadPlaylistsList() { 
+            let container = document.getElementById('playlistsList'); 
+            if(!playlists.length) { container.innerHTML = '<div class="empty-state">No playlists added yet.</div>'; return; } 
+            
+            let isAdmin = currentUser && currentUser.role === 'admin';
+
+            container.innerHTML = playlists.map(p => {
+                let visLabel = p.visibility === 'just' ? '🔒 Just Upload' : '📢 Main Upload';
+                let actionControls = isAdmin ? `
+                    <button class="admin-btn-small" onclick="togglePlaylist('${p.id}')">Toggle</button>
+                    <button class="admin-btn-small" style="background:#2196F3; color:#fff;" onclick="startPlaylistEdit('${p.id}')">✏️ Edit</button>
+                    <button class="admin-btn-small" style="background:#f44336; color:#fff;" onclick="deletePlaylist('${p.id}')">🗑 Delete</button>
+                ` : '';
+
+                return `
+                <div class="playlist-item" id="pli_${p.id}">
+                    <div class="playlist-details">
+                        <strong>${escapeHtml(p.name)}</strong> <span style="font-size:10px; opacity:0.6; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:10px;">${visLabel}</span>
+                        <div style="display:flex; align-items:center; gap:6px; margin-top:4px; flex-wrap:wrap;">
+                            <span id="urlDisplay_${p.id}" style="font-size:11px; opacity:0.5; letter-spacing:2px; font-family:monospace;">●●●●●●●●●●●●●●●●</span>
+                            <button onclick="toggleUrlVisibility('${p.id}')" id="urlToggleBtn_${p.id}" style="font-size:10px; background:rgba(255,255,255,0.1); border:none; color:#fff; padding:2px 7px; border-radius:6px; cursor:pointer;">👁 Show</button>
+                        </div>
+                        <small style="opacity:0.5;">${p.type==='file_m3u'?'📁 Uploaded File':'🌐 Network M3U'} • ${allChannels.filter(c=>c.playlistId===p.id).length} channels</small>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:4px; margin-top:8px; flex-wrap:wrap;">
+                        <span class="status-badge ${p.enabled?'status-enabled':'status-disabled'}">${p.enabled?'ACTIVE':'DISABLED'}</span>
+                        <button class="admin-btn-small" style="background:#9c27b0; color:#fff;" onclick="previewPlaylistChannel('${p.id}')">▶ Preview</button>
+                        ${actionControls}
+                    </div>
+                </div>
+            `;
+            }).join('');
+
+            window._urlMap = {};
+            playlists.forEach(p => { window._urlMap[p.id] = p.url; });
+        }
+
+        let _urlShown = {};
+        function toggleUrlVisibility(id) {
+            let display = document.getElementById('urlDisplay_' + id);
+            let btn     = document.getElementById('urlToggleBtn_' + id);
+            if (!display || !btn) return;
+            _urlShown[id] = !_urlShown[id];
+            if (_urlShown[id]) {
+                display.textContent  = window._urlMap[id] || '';
+                display.style.letterSpacing = 'normal';
+                display.style.opacity = '0.7';
+                btn.textContent = '🙈 Hide';
+            } else {
+                display.textContent  = '●●●●●●●●●●●●●●●●';
+                display.style.letterSpacing = '2px';
+                display.style.opacity = '0.5';
+                btn.textContent = '👁 Show';
+            }
+        }
+
+        let adminPreviewHls = null;
+        function previewPlaylistChannel(plId) {
+            let ch = allChannels.find(c => c.playlistId === plId && !deletedChannels.some(d=>d.id===c.id));
+            if (!ch) { alert('No channels loaded from this playlist yet. Make sure it is ACTIVE and refresh.'); return; }
+            playAdminPreview(ch);
+        }
+
+        function playAdminPreview(ch) {
+            let wrap   = document.getElementById('adminPreviewWrap');
+            let vid    = document.getElementById('adminPreviewVideo');
+            let status = document.getElementById('adminPreviewStatus');
+            let label  = document.getElementById('adminPreviewLabel');
+
+            wrap.style.display = 'block';
+            label.textContent  = '▶ ' + ch.name;
+            status.style.display = 'flex';
+            status.textContent   = 'Loading stream…';
+
+            if (adminPreviewHls) { adminPreviewHls.destroy(); adminPreviewHls = null; }
+            vid.onerror   = () => { status.style.display='flex'; status.textContent='❌ Stream offline or blocked.'; };
+            vid.onplaying = () => { status.style.display='none'; };
+
+            if (ch.url.includes('.m3u8') || ch.url.toLowerCase().includes('type=m3u')) {
+                if (Hls.isSupported()) {
+                    adminPreviewHls = new Hls();
+                    adminPreviewHls.loadSource(ch.url);
+                    adminPreviewHls.attachMedia(vid);
+                    adminPreviewHls.on(Hls.Events.MANIFEST_PARSED, () => vid.play().catch(()=>{}));
+                    adminPreviewHls.on(Hls.Events.ERROR, (e, d) => { if(d.fatal){ status.style.display='flex'; status.textContent='❌ HLS error: stream may be offline.'; } });
+                } else if (vid.canPlayType('application/vnd.apple.mpegurl')) {
+                    vid.src = ch.url; vid.play().catch(()=>{});
+                }
+            } else {
+                vid.src = ch.url; vid.play().catch(()=>{ status.style.display='flex'; status.textContent='❌ Cannot play this stream format.'; });
+            }
+
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function closeAdminPreview() {
+            let vid = document.getElementById('adminPreviewVideo');
+            vid.pause(); vid.src = '';
+            if (adminPreviewHls) { adminPreviewHls.destroy(); adminPreviewHls = null; }
+            document.getElementById('adminPreviewWrap').style.display = 'none';
+        }
+        
+        function loadAdminChannelsPaginated(page=1) { 
+            adminCurrentPage = page; 
+            let term = document.getElementById('adminChannelSearch')?.value.toLowerCase() || ''; 
+            adminFilteredChannels = allChannels.filter(c => !deletedChannels.some(d=>d.id===c.id) && c.name.toLowerCase().includes(term)); 
+            let total = Math.ceil(adminFilteredChannels.length / ADMIN_PAGE_SIZE); 
+            let start = (adminCurrentPage - 1) * ADMIN_PAGE_SIZE; 
+            let pageItems = adminFilteredChannels.slice(start, start + ADMIN_PAGE_SIZE); 
+            
+            document.getElementById('adminChannelsStats').innerHTML = `${adminFilteredChannels.length} channels · Page ${adminCurrentPage}/${total||1}`; 
+            let container = document.getElementById('adminChannelsList'); 
+            if(!pageItems.length) { container.innerHTML = '<div class="empty-state">No matching channels found</div>'; return; } 
+            
+            let isAdmin = currentUser && currentUser.role === 'admin';
+
+            container.innerHTML = pageItems.map(ch => {
+                let editControls = isAdmin ? `
+                    <select onchange="changeChannelCategory('${ch.id}',this.value)" style="background:#1a1a2e;color:white;padding:4px;border-radius:4px;">
+                        ${categories.filter(c=>c!=='All').map(c=>`<option ${ch.category===c?'selected':''}>${c}</option>`).join('')}
+                    </select>
+                    <button class="admin-btn-small" style="background:#f44336;color:#fff;" onclick="deleteChannel('${ch.id}')">Delete</button>
+                ` : '';
+
+                return `
+                <div class="admin-channel-item">
+                    <div>
+                        <strong>${escapeHtml(ch.name)}</strong>
+                        <br><small style="opacity:0.6;">${ch.category||'General'} • <span style="text-transform:uppercase;color:#ff6b6b;font-weight:bold;font-size:10px;">${ch.sectionType||'live'}</span></small>
+                    </div>
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:4px;">
+                        <button class="admin-btn-small" style="background:#9c27b0;color:#fff;" onclick="adminPreviewChannelById('${ch.id}')">▶ Preview</button>
+                        ${editControls}
+                    </div>
+                </div>`;
+            }).join(''); 
+            
+            let pagDiv = document.getElementById('adminChannelsPagination'); pagDiv.innerHTML = ''; 
+            if(total > 1) { 
+                if(adminCurrentPage > 1) pagDiv.innerHTML += `<button class="admin-btn-small" onclick="loadAdminChannelsPaginated(${adminCurrentPage-1})">◀ Prev</button>`; 
+                pagDiv.innerHTML += `<span style="margin:0 10px;">${adminCurrentPage}/${total}</span>`; 
+                if(adminCurrentPage < total) pagDiv.innerHTML += `<button class="admin-btn-small" onclick="loadAdminChannelsPaginated(${adminCurrentPage+1})">Next ▶</button>`; 
+            } 
+        }
+
+        function adminPreviewChannelById(id) {
+            let ch = allChannels.find(c => c.id === id);
+            if (!ch) return;
+            document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-content').forEach(c=>c.style.display='none');
+            document.querySelector('.admin-tab').classList.add('active');
+            document.getElementById('playlistsTab').style.display='block';
+            playAdminPreview(ch);
+        }
+        
+        function changeChannelCategory(id,newCat){ let ch=allChannels.find(c=>c.id===id); if(ch){ ch.category=newCat; localStorage.setItem('iptv_all_channels',JSON.stringify(allChannels)); updateCategoriesFromChannels(); resetMainDisplay(); loadAdminChannelsPaginated(adminCurrentPage); } }
+        async function deleteChannel(id){ let ch=allChannels.find(c=>c.id===id); if(ch&&confirm(`Hide "${ch.name}" from all users?`)){ allChannels=allChannels.filter(c=>c.id!==id); deletedChannels.push({...ch,deletedAt:new Date()}); localStorage.setItem('iptv_all_channels',JSON.stringify(allChannels)); await fbSaveConfig(); loadAdminChannelsPaginated(adminCurrentPage); loadDeletedChannelsList(); resetMainDisplay(); updateCategoriesFromChannels(); } }
+        
+        function loadDeletedChannelsList(){ 
+            let container = document.getElementById('deletedChannelsList'); 
+            if(!deletedChannels.length){ container.innerHTML='<div class="empty-state">No items deleted or hidden.</div>'; return; } 
+            
+            let isAdmin = currentUser && currentUser.role === 'admin';
+
+            container.innerHTML = deletedChannels.map(ch => {
+                let actionControls = isAdmin ? `
+                    <button class="admin-btn-small" onclick="restoreChannel('${ch.id}')">Restore</button>
+                    <button class="admin-btn-small" style="background:#b33; color:white;" onclick="permanentlyDeleteChannel('${ch.id}')">Purge</button>
+                ` : '<span style="font-size:11px; opacity:0.5;">No write permissions</span>';
+
+                return `
+                <div class="playlist-item">
+                    <div><strong>${escapeHtml(ch.name)}</strong></div>
+                    <div>${actionControls}</div>
+                </div>`;
+            }).join(''); 
+        }
+
+        async function restoreChannel(id){ let ch=deletedChannels.find(c=>c.id===id); if(ch){ deletedChannels=deletedChannels.filter(c=>c.id!==id); allChannels.push(ch); localStorage.setItem('iptv_all_channels',JSON.stringify(allChannels)); await fbSaveConfig(); loadAdminChannelsPaginated(adminCurrentPage); loadDeletedChannelsList(); resetMainDisplay(); updateCategoriesFromChannels(); } }
+        async function permanentlyDeleteChannel(id){ deletedChannels=deletedChannels.filter(c=>c.id!==id); await fbSaveConfig(); loadDeletedChannelsList(); }
+        async function addNewCategory(){ let n=document.getElementById('newCategoryName').value.trim(); if(n && !categories.includes(n)){ categories.push(n); await fbSaveConfig(); loadAdminCategoriesList(); loadCategories(); } }
+        async function deleteCategoryFromAdmin(cat){ categories=categories.filter(c=>c!==cat); await fbSaveConfig(); loadAdminCategoriesList(); loadCategories(); if(currentCategory===cat) filterByCategory('All'); }
+        
+        function loadAdminCategoriesList(){ 
+            let container=document.getElementById('adminCategoriesList'); 
+            let custom=categories.filter(c=>c!=='All'); 
+            if(!custom.length){ container.innerHTML='<div class="empty-state">No custom filter labels built yet.</div>'; return; } 
+            
+            let isAdmin = currentUser && currentUser.role === 'admin';
+
+            container.innerHTML = custom.map(c => {
+                let deleteControl = isAdmin ? `<button class="admin-btn-small" onclick="deleteCategoryFromAdmin('${c}')">Delete</button>` : '';
+                return `
+                <div class="playlist-item">
+                    <span>${c}</span>
+                    ${deleteControl}
+                </div>`;
+            }).join(''); 
+        }
+
+        // ==================== USER CONFIGS SECURITY MANAGEMENT ====================
+        async function addNewUser() { 
+            let u = document.getElementById('newUserName').value.trim(); 
+            let p = document.getElementById('newUserPass').value; 
+            let r = document.getElementById('newUserRole').value; 
+            if(!u || !p) { alert("Please complete all user fields."); return; } 
+
+            let existing = await fbGet('iptv/users/' + u);
+            if(existing){ 
+                alert("This user profile record already exists!"); 
+                return; 
+            } 
+
+            await fbSet('iptv/users/' + u, { password: p, role: r });
+            loadAdminUsersList(); 
+            document.getElementById('newUserName').value=''; 
+            document.getElementById('newUserPass').value=''; 
+        }
+
+        async function deleteUser(uname){ 
+            if(uname === currentUser.username){ 
+                alert("Security restriction. Cannot self-delete active session."); 
+                return; 
+            } 
+            if(confirm(`Are you sure you want to delete user "${uname}"?`)) {
+                await fbSet('iptv/users/' + uname, null);
+                loadAdminUsersList(); 
+            }
+        }
+
+        async function loadAdminUsersList(){ 
+            let container = document.getElementById('adminUsersList'); 
+            let usersDb = await fbGet('iptv/users') || {};
+            let userEntries = Object.entries(usersDb);
+
+            if(!userEntries.length){ 
+                container.innerHTML='<div class="empty-state">No auxiliary user profiles registered.</div>'; 
+                return; 
+            } 
+
+            container.innerHTML = userEntries.map(([uname, udata]) => `
+                <div class="playlist-item">
+                    <span><strong>${escapeHtml(uname)}</strong> (${escapeHtml(udata.role)})</span>
+                    <button class="admin-btn-small" onclick="deleteUser('${uname}')">Delete User</button>
+                </div>
+            `).join(''); 
+        }
+        
+        // ==================== NAVIGATION AND AUTH LOGIN HANDLERS ====================
+        async function handleUserLogin(){ 
+            let un = document.getElementById('loginUsername').value.trim(); 
+            let pw = document.getElementById('loginPassword').value; 
+            if (!un || !pw) { alert("Please enter credentials"); return; }
+
+            // Secure validation check directly against the Firebase path
+            let dbUser = await fbGet('iptv/users/' + un); 
+
+            // Seeding script sequence fallback for fresh database boots
+            if (!dbUser && un === 'admin1' && pw === '5787') {
+                dbUser = { password: '5787', role: 'admin' };
+                await fbSet('iptv/users/admin1', dbUser);
+            }
+
+            if (dbUser && dbUser.password === pw) { 
+                currentUser = { username: un, role: dbUser.role }; 
+                localStorage.setItem('iptv_current_user', JSON.stringify(currentUser)); 
+                updateAuthUI(); 
+                closeLoginModal(); 
+                loadFavorites(); 
+                resetMainDisplay(); 
+                alert(`Welcome back, ${un}!`);
+            } else { 
+                alert("Incorrect username or password. Please try again."); 
+                document.getElementById('loginPassword').value = '';
+            } 
+        }
+
+        function updateAuthUI(){
+            let logged = currentUser && currentUser.role !== 'guest';
+            let isStaff = currentUser && (currentUser.role === 'admin' || currentUser.role === 'superuser');
+            
+            document.getElementById('loginMenuItem').style.display = logged ? 'none' : 'block';
+            document.getElementById('logoutMenuItem').style.display = logged ? 'block' : 'none';
+            document.getElementById('adminMenuItem').style.display = isStaff ? 'block' : 'none';
+            
+            // Settings sheet
+            document.getElementById('settingsAdminBlock').style.display = isStaff ? 'block' : 'none';
+            document.getElementById('settingsUserLabel').textContent = logged ? currentUser.username + ` (${currentUser.role})` : 'Not logged in';
+            document.getElementById('settingsUserSub').textContent = logged ? 'Signed in' : 'Tap to sign in';
+            document.getElementById('settingsAuthBtn').textContent = logged ? 'Logout' : 'Login';
+            
+            // Topbar icons toggles
+            document.getElementById('userIconBtn').style.display = logged ? 'none' : 'flex';
+        }
+
+        function openLoginModal(){ document.getElementById('loginModal').classList.add('active'); closeSidebar(); }
+        function closeLoginModal(){ document.getElementById('loginModal').classList.remove('active'); }
+        
+        function logout(){ 
+            currentUser = {username:'guest', role:'guest'}; 
+            localStorage.setItem('iptv_current_user', JSON.stringify(currentUser)); 
+            updateAuthUI(); 
+            favorites=[]; 
+            resetMainDisplay(); 
+            closeSidebar(); 
+        }
+
+        function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').style.display=document.getElementById('sidebar').classList.contains('open')?'block':'none'; }
+        function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').style.display='none'; }
+        function navigateTo(page){ closeSidebar(); switchSection(page); }
+        function escapeHtml(str){ if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+        function searchAdminChannels(){ loadAdminChannelsPaginated(1); }
+        
+        // Run application initializer engine
+        init();
+    </script>
+</body>
+</html>
